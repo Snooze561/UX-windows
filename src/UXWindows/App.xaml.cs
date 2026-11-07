@@ -16,6 +16,15 @@ public partial class App : System.Windows.Application
     {
         base.OnStartup(e);
 
+        // Mode « assistant capteurs » lancé en administrateur par l'app elle-même.
+        if (e.Args.Length >= 2 && e.Args[0] == UXWindows.Core.Sensors.ElevatedSensorBridge.HelperArgument
+            && int.TryParse(e.Args[1], out int parentPid))
+        {
+            Task.Run(() => UXWindows.Core.Sensors.ElevatedSensorBridge.RunHelper(parentPid))
+                .ContinueWith(_ => Dispatcher.Invoke(Shutdown));
+            return;
+        }
+
         // Une seule instance à la fois.
         _singleInstance = new Mutex(true, "UXWindows.SingleInstance", out bool isFirst);
         if (!isFirst)

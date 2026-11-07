@@ -16,7 +16,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- WPF et Windows Forms ont des noms en commun (Brush, Image…) : on n'importe pas Windows Forms partout. -->
+    <Using Remove="System.Drawing" />
+    <Using Remove="System.Windows.Forms" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\UXWindows.Video\UXWindows.Video.csproj" />
+    <ProjectReference Include="..\UXWindows.Core\UXWindows.Core.csproj" />
   </ItemGroup>
 
 </Project>
