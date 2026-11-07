@@ -26,13 +26,14 @@ public partial class App : System.Windows.Application
 
         var config = AppConfig.Load();
 
+        CreateTrayIcon();
+
         _wallpapers = new WallpaperManager(config);
+        _wallpapers.Notify += ShowNotification;
         _wallpapers.Start();
 
         _panel = new UtilityPanel(ScreenHelper.GetUtilityScreen());
         _panel.Show();
-
-        CreateTrayIcon();
     }
 
     private void CreateTrayIcon()
@@ -56,6 +57,7 @@ public partial class App : System.Windows.Application
         menu.Items.Add(_pauseItem);
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add("Afficher / masquer le panneau", null, (_, _) => TogglePanel());
+        menu.Items.Add("Ouvrir le journal (en cas de problème)", null, (_, _) => OpenLog());
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add("Quitter", null, (_, _) => Shutdown());
 
@@ -74,14 +76,25 @@ public partial class App : System.Windows.Application
         using var dialog = new Forms.OpenFileDialog
         {
             Title = $"Fond d'écran : {ScreenHelper.Label(screen)}",
-            Filter = "Vidéos et images|*.mp4;*.wmv;*.mov;*.m4v;*.jpg;*.jpeg;*.png;*.bmp|" +
-                     "Vidéos (animé)|*.mp4;*.wmv;*.mov;*.m4v|" +
+            Filter = "Vidéos et images|*.mp4;*.wmv;*.mov;*.m4v;*.mkv;*.avi;*.jpg;*.jpeg;*.png;*.bmp|" +
+                     "Vidéos (animé)|*.mp4;*.wmv;*.mov;*.m4v;*.mkv;*.avi|" +
                      "Images (fixe)|*.jpg;*.jpeg;*.png;*.bmp",
         };
         if (dialog.ShowDialog() == Forms.DialogResult.OK)
         {
             _wallpapers?.SetWallpaper(screen, dialog.FileName);
         }
+    }
+
+    private void ShowNotification(string message)
+    {
+        _trayIcon?.ShowBalloonTip(5000, "UX-windows", message, Forms.ToolTipIcon.Warning);
+    }
+
+    private static void OpenLog()
+    {
+        Log.Write("Journal ouvert depuis le menu");
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(Log.FilePath) { UseShellExecute = true });
     }
 
     private void ToggleWallpaperPause()

@@ -18,7 +18,9 @@ D'abord pour un usage personnel, puis publiée.
 ### Fond d'écran animé (étape 2)
 
 - Un fond différent par écran.
-- Formats : vidéo (mp4, wmv, mov, m4v) décodée par la carte graphique via Media Foundation, sans son. Images fixes (jpg, png, bmp).
+- Vidéos (mp4, wmv, mov, m4v, mkv, avi) : décodage matériel Media Foundation, sans son, plafonnées à 30 images/s, affichées via DirectComposition (seule méthode visible derrière les icônes sur Windows 11 24H2 et plus). Le rendu s'arrête complètement en pause.
+- Images fixes (jpg, png, bmp) : appliquées comme vrai fond d'écran Windows, écran par écran. Aucune ressource consommée. « Retirer » remet le fond d'origine.
+- Journal `%APPDATA%\UXWindows\journal.txt` (ouvrable depuis le menu) et bulle de notification en cas d'erreur.
 - Choix du fond de chaque écran depuis l'icône de notification, mémorisé dans `%APPDATA%\UXWindows\config.json`.
 - **Pause automatique** de tous les fonds quand une application est en plein écran (jeu, Twitch en plein écran) ou quand le PC est sur batterie.
 - Lecture en boucle sans coupure.

@@ -16,6 +16,9 @@ public sealed class AppConfig
     /// <summary>Fond choisi pour chaque écran (clé : nom de l'écran Windows, ex. \\.\DISPLAY1).</summary>
     public Dictionary<string, string> Wallpapers { get; set; } = new();
 
+    /// <summary>Fond Windows d'origine de chaque écran, remis quand on retire une image.</summary>
+    public Dictionary<string, string> OriginalWallpapers { get; set; } = new();
+
     public static AppConfig Load()
     {
         try

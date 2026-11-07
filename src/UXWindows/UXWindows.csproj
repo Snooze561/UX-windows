@@ -15,4 +15,8 @@
     <Version>0.1.0</Version>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\UXWindows.Video\UXWindows.Video.csproj" />
+  </ItemGroup>
+
 </Project>
