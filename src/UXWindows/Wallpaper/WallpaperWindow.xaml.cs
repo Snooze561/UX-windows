@@ -1,6 +1,8 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using Forms = System.Windows.Forms;
 
@@ -18,6 +20,7 @@ public partial class WallpaperWindow : Window
     public bool IsPaused { get; private set; }
 
     private readonly IntPtr _workerW;
+    private MediaClock? _clock;
 
     public WallpaperWindow(Forms.Screen screen, IntPtr workerW, string path)
     {
@@ -26,20 +29,14 @@ public partial class WallpaperWindow : Window
         InitializeComponent();
 
         SourceInitialized += (_, _) => AttachToDesktop();
-        Video.MediaEnded += (_, _) =>
-        {
-            // Lecture en boucle.
-            Video.Position = TimeSpan.Zero;
-            if (!IsPaused) Video.Play();
-        };
+        Closed += (_, _) => StopVideo();
 
         Load(path);
     }
 
     public void Load(string path)
     {
-        Video.Stop();
-        Video.Source = null;
+        StopVideo();
         Picture.Source = null;
 
         HasVideo = VideoExtensions.Contains(Path.GetExtension(path).ToLowerInvariant());
@@ -47,8 +44,13 @@ public partial class WallpaperWindow : Window
         {
             Picture.Visibility = Visibility.Collapsed;
             Video.Visibility = Visibility.Visible;
-            Video.Source = new Uri(path);
-            if (!IsPaused) Video.Play();
+
+            // Une horloge média qui se répète à l'infini : la boucle est gérée par WPF,
+            // sans dépendre de l'événement de fin de vidéo.
+            var timeline = new MediaTimeline(new Uri(path)) { RepeatBehavior = RepeatBehavior.Forever };
+            _clock = timeline.CreateClock();
+            Video.Clock = _clock;
+            if (IsPaused) _clock.Controller?.Pause();
         }
         else
         {
@@ -71,9 +73,16 @@ public partial class WallpaperWindow : Window
     {
         if (paused == IsPaused) return;
         IsPaused = paused;
-        if (!HasVideo) return;
-        if (paused) Video.Pause();
-        else Video.Play();
+        if (_clock?.Controller is not { } controller) return;
+        if (paused) controller.Pause();
+        else controller.Resume();
+    }
+
+    private void StopVideo()
+    {
+        _clock?.Controller?.Stop();
+        Video.Clock = null;
+        _clock = null;
     }
 
     private void AttachToDesktop()

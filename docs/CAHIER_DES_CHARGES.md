@@ -21,7 +21,8 @@ D'abord pour un usage personnel, puis publiée.
 - Formats : vidéo (mp4, wmv, mov, m4v) décodée par la carte graphique via Media Foundation, sans son. Images fixes (jpg, png, bmp).
 - Choix du fond de chaque écran depuis l'icône de notification, mémorisé dans `%APPDATA%\UXWindows\config.json`.
 - **Pause automatique** de tous les fonds quand une application est en plein écran (jeu, Twitch en plein écran) ou quand le PC est sur batterie.
-- Pause du fond d'un seul écran quand une fenêtre agrandie le recouvre entièrement (le fond est alors invisible).
+- Lecture en boucle sans coupure.
+- État visible dans le menu de l'icône (en lecture, ou en pause avec la raison).
 - Pause manuelle depuis le menu.
 - En quittant, le fond Windows d'origine est rétabli.
 

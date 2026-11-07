@@ -1,13 +1,12 @@
 using System.IO;
-using System.Windows.Interop;
 using System.Windows.Threading;
 using Forms = System.Windows.Forms;
 
 namespace UXWindows.Wallpaper;
 
 /// <summary>
-/// Gère les fonds de chaque écran et les met en pause quand personne ne peut les voir
-/// ou quand un jeu tourne en plein écran.
+/// Gère les fonds de chaque écran et les met en pause quand un jeu ou une vidéo
+/// tourne en plein écran, sur batterie, ou à la demande.
 /// </summary>
 public sealed class WallpaperManager : IDisposable
 {
@@ -78,26 +77,32 @@ public sealed class WallpaperManager : IDisposable
         window.Show();
     }
 
+    /// <summary>Phrase d'état affichée dans le menu de l'icône.</summary>
+    public string Status { get; private set; } = "Aucun fond animé";
+
     private void UpdatePauseState()
     {
-        if (_windows.Count == 0) return;
-
-        bool pauseAll = ManualPause || IsFullscreenAppRunning() || IsOnBattery();
-        IntPtr coveredMonitor = pauseAll ? IntPtr.Zero : MonitorHiddenByForegroundWindow();
-
-        foreach (var window in _windows.Values)
+        if (_windows.Count == 0)
         {
-            bool hidden = coveredMonitor != IntPtr.Zero &&
-                          Native.MonitorFromWindow(new WindowInteropHelper(window).Handle,
-                              Native.MONITOR_DEFAULTTONEAREST) == coveredMonitor;
-            window.SetPaused(pauseAll || hidden);
+            Status = "Aucun fond animé";
+            return;
         }
+
+        string? reason =
+            ManualPause ? "pause manuelle" :
+            IsFullscreenAppRunning() ? "application en plein écran" :
+            IsOnBattery() ? "sur batterie" :
+            null;
+
+        foreach (var window in _windows.Values) window.SetPaused(reason is not null);
+
+        Status = reason is null ? "Fonds : en lecture" : $"Fonds : en pause ({reason})";
     }
 
     /// <summary>Jeu, vidéo ou présentation en plein écran, sur n'importe quel écran.</summary>
     private static bool IsFullscreenAppRunning()
     {
-        if (Native.SHQueryUserNotificationState(out int state) == 0 && state is 2 or 3 or 4)
+        if (Native.SHQueryUserNotificationState(out int state) == 0 && state is 3 or 4)
             return true;
 
         IntPtr fg = Native.GetForegroundWindow();
@@ -107,25 +112,6 @@ public sealed class WallpaperManager : IDisposable
         var info = MonitorInfoOf(fg);
         return rect.Left <= info.rcMonitor.Left && rect.Top <= info.rcMonitor.Top &&
                rect.Right >= info.rcMonitor.Right && rect.Bottom >= info.rcMonitor.Bottom;
-    }
-
-    /// <summary>
-    /// Écran entièrement recouvert par la fenêtre active agrandie : son fond est invisible,
-    /// inutile de le faire tourner.
-    /// </summary>
-    private static IntPtr MonitorHiddenByForegroundWindow()
-    {
-        IntPtr fg = Native.GetForegroundWindow();
-        if (!IsRealAppWindow(fg)) return IntPtr.Zero;
-
-        var placement = new Native.WINDOWPLACEMENT
-        {
-            length = System.Runtime.InteropServices.Marshal.SizeOf<Native.WINDOWPLACEMENT>()
-        };
-        if (!Native.GetWindowPlacement(fg, ref placement) || placement.showCmd != Native.SW_SHOWMAXIMIZED)
-            return IntPtr.Zero;
-
-        return Native.MonitorFromWindow(fg, Native.MONITOR_DEFAULTTONEAREST);
     }
 
     private static bool IsRealAppWindow(IntPtr hwnd)

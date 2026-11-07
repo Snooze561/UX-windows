@@ -48,6 +48,10 @@ public partial class App : System.Windows.Application
             menu.Items.Add(item);
         }
 
+        var statusItem = new Forms.ToolStripMenuItem { Enabled = false };
+        menu.Items.Add(statusItem);
+        menu.Opening += (_, _) => statusItem.Text = _wallpapers?.Status ?? "";
+
         _pauseItem = new Forms.ToolStripMenuItem("Mettre les fonds en pause", null, (_, _) => ToggleWallpaperPause());
         menu.Items.Add(_pauseItem);
         menu.Items.Add(new Forms.ToolStripSeparator());

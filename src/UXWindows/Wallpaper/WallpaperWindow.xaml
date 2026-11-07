@@ -11,8 +11,6 @@
         <Image x:Name="Picture" Stretch="UniformToFill" Visibility="Collapsed"/>
         <MediaElement x:Name="Video"
                       Stretch="UniformToFill"
-                      LoadedBehavior="Manual"
-                      UnloadedBehavior="Stop"
                       IsMuted="True"
                       Volume="0"
                       Visibility="Collapsed"/>
