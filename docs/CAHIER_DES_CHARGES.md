@@ -48,9 +48,12 @@ Notes techniques :
 
 ### Réglages et publication (étape 4)
 
-- Fenêtre de réglages (choix des fonds, des widgets, de l'écran utilitaire).
-- Lancement au démarrage de Windows.
-- Installateur, puis publication (GitHub Releases, plus tard Microsoft Store).
+- Fenêtre de réglages (icône de notification > Réglages…), appliqués tout de suite et enregistrés dans `config.json` :
+  fonds de chaque écran, images/s des vidéos (15 / 30 / 60), écran du panneau, sections affichées, démarrage avec Windows, température du processeur.
+- Démarrage avec Windows : valeur `UX-windows` dans `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` (chemin remis à jour à chaque lancement).
+- Température du processeur sans demande à chaque fois : tâche planifiée « UX-windows capteurs » (droits les plus élevés, à l'ouverture de session, sans limite de durée), créée une seule fois avec une autorisation administrateur. L'app la relance au démarrage si besoin ; l'assistant s'arrête quand l'app se ferme.
+- Installateur Inno Setup, par utilisateur (`%LOCALAPPDATA%\Programs\UX-windows`), sans droits administrateur, en français.
+- GitHub Actions : chaque compilation produit l'exe et l'installateur ; un tag `v*` publie une release avec les deux fichiers.
 
 ## Choix techniques
 

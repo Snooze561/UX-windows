@@ -19,6 +19,16 @@ public sealed class AppConfig
     /// <summary>Fond Windows d'origine de chaque écran, remis quand on retire une image.</summary>
     public Dictionary<string, string> OriginalWallpapers { get; set; } = new();
 
+    /// <summary>Images par seconde maximum des fonds vidéo (15, 30 ou 60).</summary>
+    public int MaxFps { get; set; } = 30;
+
+    /// <summary>Écran du panneau (nom Windows de l'écran). Vide : l'écran secondaire le plus à gauche.</summary>
+    public string? PanelScreen { get; set; }
+
+    public bool ShowSystem { get; set; } = true;
+    public bool ShowMusic { get; set; } = true;
+    public bool ShowClaude { get; set; } = true;
+
     public static AppConfig Load()
     {
         try

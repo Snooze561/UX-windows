@@ -15,7 +15,7 @@ internal sealed class VideoWallpaper : IDisposable
     public Forms.Screen Screen { get; }
     public string Path { get; }
 
-    public VideoWallpaper(Forms.Screen screen, DesktopHost.Layer layer, string path, Action<string> onError)
+    public VideoWallpaper(Forms.Screen screen, DesktopHost.Layer layer, string path, int maxFps, Action<string> onError)
     {
         Screen = screen;
         Path = path;
@@ -38,7 +38,7 @@ internal sealed class VideoWallpaper : IDisposable
 
         try
         {
-            _renderer = new VideoRenderer(_host.Handle, screen.Bounds.Width, screen.Bounds.Height, path);
+            _renderer = new VideoRenderer(_host.Handle, screen.Bounds.Width, screen.Bounds.Height, path, maxFps);
         }
         catch
         {

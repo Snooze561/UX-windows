@@ -26,7 +26,7 @@ public partial class UtilityPanel : Window
 
     private static readonly CultureInfo French = new("fr-FR");
 
-    private readonly Forms.Screen _screen;
+    private Forms.Screen _screen;
     private readonly DispatcherTimer _clockTimer;
     private readonly DispatcherTimer _sensorTimer;
     private readonly DispatcherTimer _claudeTimer;
@@ -65,6 +65,21 @@ public partial class UtilityPanel : Window
             _music.Dispose();
             _sensors?.Dispose();
         };
+    }
+
+    /// <summary>Déplace le panneau sur un autre écran.</summary>
+    public void MoveTo(Forms.Screen screen)
+    {
+        _screen = screen;
+        if (new WindowInteropHelper(this).Handle != IntPtr.Zero) PlaceOnScreen();
+    }
+
+    /// <summary>Affiche ou masque chaque section selon les réglages.</summary>
+    public void ApplySections(bool system, bool music, bool claude)
+    {
+        SystemSection.Visibility = system ? Visibility.Visible : Visibility.Collapsed;
+        MusicSection.Visibility = music ? Visibility.Visible : Visibility.Collapsed;
+        ClaudeSection.Visibility = claude ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private async Task StartWidgetsAsync()
@@ -117,7 +132,7 @@ public partial class UtilityPanel : Window
 
     private async Task UpdateSensorsAsync()
     {
-        if (_sensors is null || _readingSensors) return;
+        if (_sensors is null || _readingSensors || SystemSection.Visibility != Visibility.Visible) return;
         _readingSensors = true;
         try
         {
@@ -161,19 +176,22 @@ public partial class UtilityPanel : Window
                 ? "Température et watts du processeur : installe d'abord le pilote PawnIO (clique ici)."
                 : _askedForAdmin
                     ? "En attente de l'autorisation administrateur…"
-                    : "Clique ici pour afficher la température et les watts du processeur (Windows demandera une autorisation).";
+                    : "Clique ici pour afficher la température et les watts du processeur (Windows demandera une autorisation, une seule fois).";
         }
     }
 
-    private void CpuHint_Click(object sender, MouseButtonEventArgs e)
+    private async void CpuHint_Click(object sender, MouseButtonEventArgs e)
     {
         if (!HardwareSensors.IsPawnIoInstalled())
         {
             OpenUrl("https://pawnio.eu/");
             return;
         }
-        _askedForAdmin = ElevatedSensorBridge.StartHelper();
-        Log.Write(_askedForAdmin ? "Assistant capteurs lancé" : "Autorisation administrateur refusée");
+        _askedForAdmin = true;
+        CpuHint.Text = "En attente de l'autorisation administrateur…";
+        bool ok = await Task.Run(SensorAutoStart.Enable);
+        if (!ok) _askedForAdmin = false;
+        Log.Write(ok ? "Température CPU activée" : "Autorisation administrateur refusée");
     }
 
     private static string Format(float? value, string unit) =>

@@ -8,8 +8,11 @@ public static class ScreenHelper
     /// L'écran des utilitaires : l'écran secondaire le plus à gauche.
     /// S'il n'y a qu'un seul écran, on prend l'écran principal.
     /// </summary>
-    public static Forms.Screen GetUtilityScreen()
+    public static Forms.Screen GetUtilityScreen(string? preferredDeviceName = null)
     {
+        var preferred = Forms.Screen.AllScreens.FirstOrDefault(s => s.DeviceName == preferredDeviceName);
+        if (preferred is not null) return preferred;
+
         var secondary = Forms.Screen.AllScreens
             .Where(s => !s.Primary)
             .OrderBy(s => s.Bounds.Left)

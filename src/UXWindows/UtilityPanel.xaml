@@ -19,6 +19,7 @@
             <TextBlock x:Name="DateText" Text="samedi 7 novembre" FontSize="20" Margin="4,0,0,0"
                        Foreground="{StaticResource TextSecondary}"/>
 
+            <StackPanel x:Name="SystemSection">
             <!-- ===== Système ===== -->
             <TextBlock Text="Système" Style="{StaticResource SectionTitle}"/>
 
@@ -67,7 +68,9 @@
                                  Background="{StaticResource BarTrack}" Foreground="{StaticResource Accent}" BorderThickness="0"/>
                 </StackPanel>
             </Border>
+            </StackPanel>
 
+            <StackPanel x:Name="MusicSection">
             <!-- ===== Musique ===== -->
             <TextBlock Text="Musique" Style="{StaticResource SectionTitle}"/>
 
@@ -94,7 +97,9 @@
                     </DockPanel>
                 </Grid>
             </Border>
+            </StackPanel>
 
+            <StackPanel x:Name="ClaudeSection">
             <!-- ===== Claude Code ===== -->
             <TextBlock Text="Claude Code" Style="{StaticResource SectionTitle}"/>
 
@@ -126,6 +131,7 @@
                     </Button>
                 </StackPanel>
             </Border>
+            </StackPanel>
 
         </StackPanel>
     </Border>

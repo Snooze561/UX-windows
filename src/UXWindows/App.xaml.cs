@@ -10,6 +10,8 @@ public partial class App : System.Windows.Application
     private UtilityPanel? _panel;
     private WallpaperManager? _wallpapers;
     private Forms.ToolStripMenuItem? _pauseItem;
+    private AppConfig? _config;
+    private SettingsWindow? _settings;
     private static Mutex? _singleInstance;
 
     protected override void OnStartup(StartupEventArgs e)
@@ -17,37 +19,61 @@ public partial class App : System.Windows.Application
         base.OnStartup(e);
 
         // Mode « assistant capteurs » lancé en administrateur par l'app elle-même.
-        if (e.Args.Length >= 2 && e.Args[0] == UXWindows.Core.Sensors.ElevatedSensorBridge.HelperArgument
-            && int.TryParse(e.Args[1], out int parentPid))
+        if (e.Args.Length >= 2 && e.Args[0] == UXWindows.Core.Sensors.ElevatedSensorBridge.HelperArgument)
         {
-            Task.Run(() => UXWindows.Core.Sensors.ElevatedSensorBridge.RunHelper(parentPid))
+            string parent = e.Args[1];
+            Task.Run(() => UXWindows.Core.Sensors.ElevatedSensorBridge.RunHelper(parent))
                 .ContinueWith(_ => Dispatcher.Invoke(Shutdown));
             return;
         }
 
         // Une seule instance à la fois.
-        _singleInstance = new Mutex(true, "UXWindows.SingleInstance", out bool isFirst);
+        _singleInstance = new Mutex(true, UXWindows.Core.Sensors.ElevatedSensorBridge.MainAppMutex, out bool isFirst);
         if (!isFirst)
         {
             Shutdown();
             return;
         }
 
-        var config = AppConfig.Load();
+        _config = AppConfig.Load();
 
         CreateTrayIcon();
 
-        _wallpapers = new WallpaperManager(config);
+        _wallpapers = new WallpaperManager(_config);
         _wallpapers.Notify += ShowNotification;
         _wallpapers.Start();
 
-        _panel = new UtilityPanel(ScreenHelper.GetUtilityScreen());
+        _panel = new UtilityPanel(ScreenHelper.GetUtilityScreen(_config.PanelScreen));
+        _panel.ApplySections(_config.ShowSystem, _config.ShowMusic, _config.ShowClaude);
         _panel.Show();
+
+        // Si l'app a été déplacée (nouvelle installation), le démarrage avec Windows suit.
+        try { UXWindows.Core.Startup.StartupManager.RefreshStartWithWindowsPath(); }
+        catch (Exception ex) { Log.Write($"Démarrage avec Windows : {ex.Message}"); }
+
+        // Température CPU : relance l'assistant administrateur sans demande, s'il a été activé.
+        Task.Run(SensorAutoStart.StartIfInstalled);
+    }
+
+    private void OpenSettings()
+    {
+        if (_config is null || _wallpapers is null || _panel is null) return;
+        if (_settings is not null)
+        {
+            _settings.Activate();
+            return;
+        }
+        _settings = new SettingsWindow(_config, _wallpapers, _panel, PickWallpaperFile);
+        _settings.Closed += (_, _) => _settings = null;
+        _settings.Show();
+        _settings.Activate();
     }
 
     private void CreateTrayIcon()
     {
         var menu = new Forms.ContextMenuStrip();
+        menu.Items.Add("Réglages…", null, (_, _) => OpenSettings());
+        menu.Items.Add(new Forms.ToolStripSeparator());
 
         // Un sous-menu par écran, de gauche à droite.
         foreach (var screen in Forms.Screen.AllScreens.OrderBy(s => s.Bounds.Left))
@@ -72,7 +98,7 @@ public partial class App : System.Windows.Application
 
         _trayIcon = new Forms.NotifyIcon
         {
-            Icon = System.Drawing.SystemIcons.Application,
+            Icon = LoadAppIcon(),
             Text = "UX-windows",
             ContextMenuStrip = menu,
             Visible = true,
@@ -80,7 +106,25 @@ public partial class App : System.Windows.Application
         _trayIcon.DoubleClick += (_, _) => TogglePanel();
     }
 
+    private static System.Drawing.Icon LoadAppIcon()
+    {
+        try
+        {
+            if (Environment.ProcessPath is { } exe && System.Drawing.Icon.ExtractAssociatedIcon(exe) is { } icon)
+                return icon;
+        }
+        catch (Exception)
+        {
+        }
+        return System.Drawing.SystemIcons.Application;
+    }
+
     private void PickWallpaper(Forms.Screen screen)
+    {
+        if (PickWallpaperFile(screen) is { } file) _wallpapers?.SetWallpaper(screen, file);
+    }
+
+    private static string? PickWallpaperFile(Forms.Screen screen)
     {
         using var dialog = new Forms.OpenFileDialog
         {
@@ -89,10 +133,7 @@ public partial class App : System.Windows.Application
                      "Vidéos (animé)|*.mp4;*.wmv;*.mov;*.m4v;*.mkv;*.avi|" +
                      "Images (fixe)|*.jpg;*.jpeg;*.png;*.bmp",
         };
-        if (dialog.ShowDialog() == Forms.DialogResult.OK)
-        {
-            _wallpapers?.SetWallpaper(screen, dialog.FileName);
-        }
+        return dialog.ShowDialog() == Forms.DialogResult.OK ? dialog.FileName : null;
     }
 
     private void ShowNotification(string message)

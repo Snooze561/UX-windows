@@ -93,6 +93,19 @@ public sealed class WallpaperManager : IDisposable
         UpdatePauseState();
     }
 
+    /// <summary>Relance les vidéos (après un changement de réglage comme les images par seconde).</summary>
+    public void ReloadVideos()
+    {
+        foreach (var screen in Forms.Screen.AllScreens)
+        {
+            if (!_videos.ContainsKey(screen.DeviceName)) continue;
+            StopVideo(screen);
+            if (_config.Wallpapers.TryGetValue(screen.DeviceName, out var path) && File.Exists(path))
+                StartVideo(screen, path);
+        }
+        UpdatePauseState();
+    }
+
     public void ToggleManualPause()
     {
         ManualPause = !ManualPause;
@@ -110,7 +123,7 @@ public sealed class WallpaperManager : IDisposable
 
         try
         {
-            var video = new VideoWallpaper(screen, layer, path, reason =>
+            var video = new VideoWallpaper(screen, layer, path, _config.MaxFps, reason =>
                 _dispatcher.InvokeAsync(() =>
                 {
                     Log.Write($"Lecture impossible ({path}) : {reason}");
