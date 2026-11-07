@@ -1,0 +1,11 @@
+<Application x:Class="UXWindows.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <SolidColorBrush x:Key="PanelBackground" Color="#E6101014"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#F2F2F5"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#8A8A99"/>
+        <FontFamily x:Key="UiFont">Segoe UI Variable Display, Segoe UI</FontFamily>
+    </Application.Resources>
+</Application>
