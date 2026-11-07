@@ -15,6 +15,7 @@ public sealed class MusicService : IDisposable
     private GlobalSystemMediaTransportControlsSession? _session;
     private string? _artworkKey;
     private byte[]? _artwork;
+    private int _version;
 
     /// <summary>Appelé (sur un thread quelconque) quand le morceau ou l'état de lecture change.</summary>
     public event Action<NowPlaying?>? Changed;
@@ -55,23 +56,37 @@ public sealed class MusicService : IDisposable
         {
             if (_session is not null)
             {
-                _session.MediaPropertiesChanged -= OnSessionChanged;
+                _session.MediaPropertiesChanged -= OnMediaPropertiesChanged;
                 _session.PlaybackInfoChanged -= OnSessionChanged;
             }
             _session = chosen;
             if (_session is not null)
             {
-                _session.MediaPropertiesChanged += OnSessionChanged;
+                _session.MediaPropertiesChanged += OnMediaPropertiesChanged;
                 _session.PlaybackInfoChanged += OnSessionChanged;
             }
         }
         await PublishAsync();
     }
 
-    private void OnSessionChanged(GlobalSystemMediaTransportControlsSession sender, object args) => _ = PublishAsync();
+    private void OnSessionChanged(GlobalSystemMediaTransportControlsSession sender, object args) =>
+        _ = PublishAsync(reloadArtwork: false);
 
-    private async Task PublishAsync()
+    /// <summary>
+    /// Changement de morceau. Apple Music envoie souvent le titre d'abord et la pochette un peu après :
+    /// on relit donc la pochette tout de suite, puis encore une fois 1,5 s plus tard.
+    /// </summary>
+    private void OnMediaPropertiesChanged(GlobalSystemMediaTransportControlsSession sender, object args)
     {
+        _ = PublishAsync(reloadArtwork: true);
+        _ = Task.Delay(1500).ContinueWith(_ => PublishAsync(reloadArtwork: true));
+    }
+
+    private async Task PublishAsync(bool reloadArtwork = true)
+    {
+        // Les lectures se chevauchent : seule la plus récente a le droit d'afficher son résultat.
+        int version = Interlocked.Increment(ref _version);
+
         var session = _session;
         if (session is null)
         {
@@ -85,20 +100,23 @@ public sealed class MusicService : IDisposable
             var playback = session.GetPlaybackInfo();
             bool playing = playback?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
 
-            // La pochette n'est relue que quand le morceau change.
             string key = $"{props.Artist}|{props.AlbumTitle}|{props.Title}";
-            if (key != _artworkKey)
+            byte[]? artwork = _artwork;
+            if (reloadArtwork || key != _artworkKey)
             {
-                _artworkKey = key;
-                _artwork = props.Thumbnail is null ? null : await ReadAllAsync(props.Thumbnail);
+                artwork = props.Thumbnail is null ? null : await ReadAllAsync(props.Thumbnail);
             }
+
+            if (version != Volatile.Read(ref _version)) return; // une lecture plus récente a eu lieu
+            _artworkKey = key;
+            _artwork = artwork;
 
             Changed?.Invoke(new NowPlaying(props.Title ?? "", props.Artist ?? "", playing, _artwork, session.SourceAppUserModelId));
         }
         catch (Exception)
         {
             // L'app de musique vient de se fermer, par exemple.
-            Changed?.Invoke(null);
+            if (version == Volatile.Read(ref _version)) Changed?.Invoke(null);
         }
     }
 
@@ -124,7 +142,7 @@ public sealed class MusicService : IDisposable
     {
         if (_session is not null)
         {
-            _session.MediaPropertiesChanged -= OnSessionChanged;
+            _session.MediaPropertiesChanged -= OnMediaPropertiesChanged;
             _session.PlaybackInfoChanged -= OnSessionChanged;
         }
     }
