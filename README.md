@@ -14,11 +14,16 @@ Le détail est dans le [cahier des charges](docs/CAHIER_DES_CHARGES.md).
 4. Décompresse-le et lance `UXWindows.exe`.
    Windows peut afficher « Windows a protégé votre ordinateur » : clique sur **Informations complémentaires**, puis **Exécuter quand même**. C'est normal pour une app pas encore signée.
 
-Une icône apparaît à côté de l'horloge de la barre des tâches : clic droit pour masquer le panneau ou quitter.
+Une icône apparaît à côté de l'horloge de la barre des tâches. Clic droit dessus pour :
+- choisir le fond (vidéo ou image) de chaque écran ;
+- mettre les fonds en pause ;
+- masquer le panneau ou quitter.
+
+Les fonds animés se mettent en pause tout seuls quand un jeu ou une vidéo passe en plein écran.
 
 ## Avancement
 
 - [x] Étape 1 : cadrage et squelette (panneau de gauche avec horloge, icône de notification)
-- [ ] Étape 2 : fond d'écran animé avec pause automatique en plein écran
-- [ ] Étape 3 : widgets CPU / GPU (températures, watts) et Apple Music
+- [x] Étape 2 : fond d'écran animé avec pause automatique en plein écran
+- [ ] Étape 3 : widgets CPU / GPU (températures, watts), Apple Music et Claude Code
 - [ ] Étape 4 : réglages, lancement au démarrage, installateur
