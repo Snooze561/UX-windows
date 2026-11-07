@@ -41,7 +41,9 @@ Ancré sur toute la hauteur de l'écran de gauche, fond sombre.
 | Claude Code | Bouton de lancement, et suivi des sessions (tâche terminée, attend une réponse) |
 
 Notes techniques :
-- Températures et watts : bibliothèque **LibreHardwareMonitor** (nécessite de lancer l'app en administrateur pour lire certains capteurs).
+- Températures et watts : bibliothèque **LibreHardwareMonitor** 0.9.6, lue toutes les 2 s. La carte graphique marche sans droits. Le processeur demande le pilote **PawnIO** et des droits administrateur : l'app lance alors une copie d'elle-même en mode `--capteurs` (administrateur) qui écrit ses lectures dans `%LOCALAPPDATA%\UXWindows\capteurs.json` ; l'app principale reste en mode normal.
+- Claude Code : lecture des journaux de session `%USERPROFILE%\.claude\projects\**\*.jsonl` (sessions lancées sur ce PC uniquement). « En cours » si le fichier a bougé il y a moins de 20 s, « attend ta réponse » si le dernier message est de Claude. Le bouton ouvre l'app Claude, sinon `claude` dans Windows Terminal, sinon claude.ai/code.
+- Tous les rafraîchissements s'arrêtent quand le panneau est masqué.
 - Apple Music : via les contrôles média de Windows (`GlobalSystemMediaTransportControls`), qui marchent avec l'app Apple Music de Windows.
 
 ### Réglages et publication (étape 4)

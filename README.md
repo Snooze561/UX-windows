@@ -21,9 +21,25 @@ Une icône apparaît à côté de l'horloge de la barre des tâches. Clic droit 
 
 Les fonds animés se mettent en pause tout seuls quand un jeu ou une vidéo passe en plein écran.
 
+## Le panneau de gauche
+
+- **Système** : température, consommation (watts) et charge du processeur et de la carte graphique.
+- **Musique** : morceau en cours dans Apple Music (ou toute autre app de musique), avec pochette et boutons.
+- **Claude Code** : tes sessions Claude Code sur ce PC (en cours, ou en attente de ta réponse) et un bouton pour ouvrir Claude.
+
+### Activer la température du processeur (une seule fois)
+
+Windows protège ces capteurs : il faut un petit pilote gratuit, **PawnIO**.
+
+1. Ouvre le menu Démarrer, tape `terminal`, puis lance **Terminal**.
+2. Colle cette ligne et appuie sur Entrée : `winget install namazso.PawnIO`
+3. Dans le panneau, clique sur le texte orange sous « Processeur » et accepte la demande de Windows.
+
+La carte graphique, elle, s'affiche sans rien installer.
+
 ## Avancement
 
 - [x] Étape 1 : cadrage et squelette (panneau de gauche avec horloge, icône de notification)
 - [x] Étape 2 : fond d'écran animé avec pause automatique en plein écran
-- [ ] Étape 3 : widgets CPU / GPU (températures, watts), Apple Music et Claude Code
+- [x] Étape 3 : widgets CPU / GPU (températures, watts), Apple Music et Claude Code
 - [ ] Étape 4 : réglages, lancement au démarrage, installateur

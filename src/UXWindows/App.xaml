@@ -4,8 +4,59 @@
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
         <SolidColorBrush x:Key="PanelBackground" Color="#E6101014"/>
+        <SolidColorBrush x:Key="CardBackground" Color="#14FFFFFF"/>
+        <SolidColorBrush x:Key="CardHover" Color="#24FFFFFF"/>
         <SolidColorBrush x:Key="TextPrimary" Color="#F2F2F5"/>
         <SolidColorBrush x:Key="TextSecondary" Color="#8A8A99"/>
+        <SolidColorBrush x:Key="Accent" Color="#D97757"/>
+        <SolidColorBrush x:Key="Ok" Color="#5FBF8A"/>
+        <SolidColorBrush x:Key="BarTrack" Color="#26FFFFFF"/>
         <FontFamily x:Key="UiFont">Segoe UI Variable Display, Segoe UI</FontFamily>
+        <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+
+        <!-- Titre de section : petites capitales grises -->
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="Margin" Value="4,32,0,10"/>
+            <Setter Property="Typography.Capitals" Value="AllSmallCaps"/>
+        </Style>
+
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="16,14"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <!-- Bouton sobre : icône ou texte, fond qui s'éclaire au survol -->
+        <Style x:Key="FlatButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource CardHover}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="IconButton" TargetType="Button" BasedOn="{StaticResource FlatButton}">
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="36"/>
+        </Style>
     </Application.Resources>
 </Application>
