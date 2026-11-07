@@ -18,9 +18,12 @@ D'abord pour un usage personnel, puis publiée.
 ### Fond d'écran animé (étape 2)
 
 - Un fond différent par écran.
-- Formats : vidéo (mp4) décodée par la carte graphique, en priorité. Images fixes en secours.
-- Limite d'images par seconde réglable (30 par défaut).
-- **Pause automatique** quand une application est en plein écran (jeu, Twitch en plein écran) ou quand le PC est sur batterie.
+- Formats : vidéo (mp4, wmv, mov, m4v) décodée par la carte graphique via Media Foundation, sans son. Images fixes (jpg, png, bmp).
+- Choix du fond de chaque écran depuis l'icône de notification, mémorisé dans `%APPDATA%\UXWindows\config.json`.
+- **Pause automatique** de tous les fonds quand une application est en plein écran (jeu, Twitch en plein écran) ou quand le PC est sur batterie.
+- Pause du fond d'un seul écran quand une fenêtre agrandie le recouvre entièrement (le fond est alors invisible).
+- Pause manuelle depuis le menu.
+- En quittant, le fond Windows d'origine est rétabli.
 
 ### Panneau utilitaire de l'écran de gauche (étape 3)
 
@@ -32,6 +35,7 @@ Ancré sur toute la hauteur de l'écran de gauche, fond sombre.
 | Processeur (CPU) | Température, consommation en watts, charge en % |
 | Carte graphique (GPU) | Température, consommation en watts, charge en % |
 | Apple Music | Titre en cours, pochette, lecture / pause / suivant / précédent |
+| Claude Code | Bouton de lancement, et suivi des sessions (tâche terminée, attend une réponse) |
 
 Notes techniques :
 - Températures et watts : bibliothèque **LibreHardwareMonitor** (nécessite de lancer l'app en administrateur pour lire certains capteurs).
