@@ -3,8 +3,12 @@ name: Compilation
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -16,16 +20,51 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Numéro de version
+        id: version
+        shell: pwsh
+        run: |
+          if ("${{ github.ref }}" -like "refs/tags/v*") {
+            $v = "${{ github.ref_name }}".TrimStart("v")
+          } else {
+            $v = ([xml](Get-Content src/UXWindows/UXWindows.csproj)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          }
+          "value=$v" >> $env:GITHUB_OUTPUT
+
       - name: Compiler l'application
         run: >
           dotnet publish src/UXWindows/UXWindows.csproj
           -c Release -r win-x64 --self-contained true
           -p:PublishSingleFile=true
           -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:Version=${{ steps.version.outputs.value }}
           -o publish
+
+      - name: Construire l'installateur
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=${{ steps.version.outputs.value }}" installer\UXWindows.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Mettre l'application en téléchargement
         uses: actions/upload-artifact@v4
         with:
           name: UXWindows
           path: publish/UXWindows.exe
+
+      - name: Mettre l'installateur en téléchargement
+        uses: actions/upload-artifact@v4
+        with:
+          name: UX-windows-Setup
+          path: out/*.exe
+
+      - name: Publier la version sur GitHub
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: UX-windows ${{ steps.version.outputs.value }}
+          files: |
+            out/*.exe
+            publish/UXWindows.exe
+          generate_release_notes: true

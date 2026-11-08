@@ -12,7 +12,8 @@
     <AssemblyName>UXWindows</AssemblyName>
     <RootNamespace>UXWindows</RootNamespace>
     <Product>UX-windows</Product>
-    <Version>0.1.0</Version>
+    <Version>0.4.0</Version>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

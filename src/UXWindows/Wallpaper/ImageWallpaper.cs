@@ -10,6 +10,46 @@ namespace UXWindows.Wallpaper;
 internal static class ImageWallpaper
 {
     private const int DWPOS_FILL = 4;
+    private const int DWPOS_SPAN = 5;
+
+    /// <summary>
+    /// Une seule image étalée sur tous les écrans (mode « Étendre » de Windows).
+    /// Renvoie l'ancien fond s'il était le même partout.
+    /// </summary>
+    public static string? SetSpanned(string imagePath)
+    {
+        var wallpaper = (IDesktopWallpaper)new DesktopWallpaperClass();
+        try
+        {
+            string? previous = null;
+            try { previous = wallpaper.GetWallpaper(null); }
+            catch (COMException) { /* fonds différents selon les écrans */ }
+
+            wallpaper.SetPosition(DWPOS_SPAN);
+            wallpaper.SetWallpaper(null, imagePath);
+            Log.Write($"Fond Windows étalé sur tous les écrans : {imagePath} (avant : {previous})");
+            return previous;
+        }
+        finally
+        {
+            Marshal.ReleaseComObject(wallpaper);
+        }
+    }
+
+    /// <summary>Même image sur tous les écrans, en mode « Remplir » (pour revenir au fond d'origine).</summary>
+    public static void SetAllFilled(string imagePath)
+    {
+        var wallpaper = (IDesktopWallpaper)new DesktopWallpaperClass();
+        try
+        {
+            wallpaper.SetPosition(DWPOS_FILL);
+            wallpaper.SetWallpaper(null, imagePath);
+        }
+        finally
+        {
+            Marshal.ReleaseComObject(wallpaper);
+        }
+    }
 
     /// <summary>Change le fond Windows de l'écran et renvoie l'ancien (pour pouvoir le remettre).</summary>
     public static string? Set(Forms.Screen screen, string imagePath)
