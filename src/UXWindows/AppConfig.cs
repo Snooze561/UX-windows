@@ -30,6 +30,9 @@ public sealed class AppConfig
     public bool ShowClaude { get; set; } = true;
     public bool ShowFans { get; set; } = true;
 
+    /// <summary>Ordre des cartes du panneau (clock, cpu, gpu, fans, music, claude). Vide : ordre d'origine.</summary>
+    public List<string>? CardOrder { get; set; }
+
     /// <summary>Carte graphique affichée (nom complet). Vide : la carte dédiée, choisie automatiquement.</summary>
     public string? PanelGpu { get; set; }
 

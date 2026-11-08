@@ -68,6 +68,12 @@
                         <ComboBox x:Name="GpuBox" DockPanel.Dock="Right" Width="200" SelectionChanged="Gpu_Changed"/>
                         <TextBlock Text="Carte graphique affichée" Style="{StaticResource Label}"/>
                     </DockPanel>
+                    <DockPanel Margin="0,14,0,0">
+                        <Button Content="Ordre d'origine" Style="{StaticResource SmallButton}" DockPanel.Dock="Right"
+                                Click="ResetCards_Click"/>
+                        <TextBlock Text="Pour déplacer une carte du panneau, maintiens le clic dessus et fais-la glisser."
+                                   Style="{StaticResource Label}" TextWrapping="Wrap" Margin="0,0,12,0"/>
+                    </DockPanel>
                 </StackPanel>
             </Border>
 

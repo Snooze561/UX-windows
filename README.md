@@ -23,6 +23,8 @@ Pour désinstaller : *Paramètres Windows > Applications > UX-windows > Désinst
 
 ## Le panneau de gauche
 
+Chaque widget est une carte sombre et translucide posée sur le fond d'écran. Pour changer l'ordre, maintiens le clic sur une carte et fais-la glisser vers le haut ou le bas : l'ordre est retenu. *Réglages > Ordre d'origine* remet la disposition de départ.
+
 - **Système** : température, consommation (watts) et charge du processeur et de la carte graphique.
   C'est la carte dédiée (NVIDIA, AMD Radeon RX, Intel Arc) qui s'affiche, pas la puce intégrée au processeur ; on peut en choisir une autre dans les Réglages.
 - **Ventilateurs** : vitesse de chaque ventilateur et profil actif de **[EZFAN](https://github.com/Snooze561/EZFAN)**, avec un bouton par profil (Bureautique, Jeux légers, Jeux AAA, Performance) et un bouton pour ouvrir EZFAN. C'est EZFAN qui pilote les ventilateurs ; UX-windows affiche et change seulement le profil.
