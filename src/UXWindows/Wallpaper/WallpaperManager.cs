@@ -38,21 +38,45 @@ public sealed class WallpaperManager : IDisposable
     public static bool IsVideo(string path) =>
         VideoExtensions.Contains(Path.GetExtension(path).ToLowerInvariant());
 
+    /// <summary>Clé utilisée dans les réglages pour une image ou vidéo étalée sur tous les écrans.</summary>
+    public const string AllScreensKey = "*";
+
+    /// <summary>Fond étalé sur tous les écrans, s'il y en a un.</summary>
+    public string? SpannedWallpaper => _config.Wallpapers.GetValueOrDefault(AllScreensKey);
+
     public void Start()
     {
         Log.Write($"Démarrage, Windows {Environment.OSVersion.Version}");
-        foreach (var screen in Forms.Screen.AllScreens)
+        if (SpannedWallpaper is { } spanned)
         {
-            if (_config.Wallpapers.TryGetValue(screen.DeviceName, out var path) && File.Exists(path) && IsVideo(path))
-                StartVideo(screen, path);
+            if (File.Exists(spanned) && IsVideo(spanned)) StartVideo(null, spanned);
+        }
+        else
+        {
+            foreach (var screen in Forms.Screen.AllScreens)
+            {
+                if (_config.Wallpapers.TryGetValue(screen.DeviceName, out var path) && File.Exists(path) && IsVideo(path))
+                    StartVideo(screen, path);
+            }
         }
         _watcher.Start();
         UpdatePauseState();
     }
 
-    public void SetWallpaper(Forms.Screen screen, string path)
+    /// <summary>Change le fond d'un écran, ou de tous les écrans à la fois (une seule image) si <paramref name="screen"/> est null.</summary>
+    public void SetWallpaper(Forms.Screen? screen, string path)
     {
-        StopVideo(screen);
+        if (screen is null)
+        {
+            // Une seule image sur tout le bureau : elle remplace les fonds de chaque écran.
+            StopAllVideos();
+            foreach (var key in _config.Wallpapers.Keys.ToList()) _config.Wallpapers.Remove(key);
+        }
+        else
+        {
+            StopVideo(screen.DeviceName);
+            if (_config.Wallpapers.Remove(AllScreensKey)) StopVideo(AllScreensKey);
+        }
 
         if (IsVideo(path))
         {
@@ -62,9 +86,10 @@ public sealed class WallpaperManager : IDisposable
         {
             try
             {
-                string? previous = ImageWallpaper.Set(screen, path);
-                if (previous is not null && !_config.OriginalWallpapers.ContainsKey(screen.DeviceName))
-                    _config.OriginalWallpapers[screen.DeviceName] = previous;
+                string key = screen?.DeviceName ?? AllScreensKey;
+                string? previous = screen is null ? ImageWallpaper.SetSpanned(path) : ImageWallpaper.Set(screen, path);
+                if (previous is not null && !_config.OriginalWallpapers.ContainsKey(key))
+                    _config.OriginalWallpapers[key] = previous;
             }
             catch (Exception ex)
             {
@@ -74,19 +99,25 @@ public sealed class WallpaperManager : IDisposable
             }
         }
 
-        _config.Wallpapers[screen.DeviceName] = path;
+        _config.Wallpapers[screen?.DeviceName ?? AllScreensKey] = path;
         _config.Save();
         UpdatePauseState();
     }
 
-    public void ClearWallpaper(Forms.Screen screen)
+    /// <summary>Retire le fond d'un écran, ou le fond étalé si <paramref name="screen"/> est null.</summary>
+    public void ClearWallpaper(Forms.Screen? screen)
     {
-        StopVideo(screen);
-        _config.Wallpapers.Remove(screen.DeviceName);
+        string key = screen?.DeviceName ?? AllScreensKey;
+        StopVideo(key);
+        _config.Wallpapers.Remove(key);
 
-        if (_config.OriginalWallpapers.Remove(screen.DeviceName, out var original) && File.Exists(original))
+        if (_config.OriginalWallpapers.Remove(key, out var original) && File.Exists(original))
         {
-            try { ImageWallpaper.Set(screen, original); }
+            try
+            {
+                if (screen is null) ImageWallpaper.SetAllFilled(original);
+                else ImageWallpaper.Set(screen, original);
+            }
             catch (Exception ex) { Log.Write($"Échec du retour au fond d'origine : {ex}"); }
         }
         _config.Save();
@@ -96,12 +127,12 @@ public sealed class WallpaperManager : IDisposable
     /// <summary>Relance les vidéos (après un changement de réglage comme les images par seconde).</summary>
     public void ReloadVideos()
     {
-        foreach (var screen in Forms.Screen.AllScreens)
+        foreach (var key in _videos.Keys.ToList())
         {
-            if (!_videos.ContainsKey(screen.DeviceName)) continue;
-            StopVideo(screen);
-            if (_config.Wallpapers.TryGetValue(screen.DeviceName, out var path) && File.Exists(path))
-                StartVideo(screen, path);
+            StopVideo(key);
+            if (!_config.Wallpapers.TryGetValue(key, out var path) || !File.Exists(path)) continue;
+            var screen = Forms.Screen.AllScreens.FirstOrDefault(s => s.DeviceName == key);
+            if (key == AllScreensKey || screen is not null) StartVideo(screen, path);
         }
         UpdatePauseState();
     }
@@ -112,7 +143,8 @@ public sealed class WallpaperManager : IDisposable
         UpdatePauseState();
     }
 
-    private bool StartVideo(Forms.Screen screen, string path)
+    /// <summary>Lance une vidéo sur un écran, ou sur tout le bureau si <paramref name="screen"/> est null.</summary>
+    private bool StartVideo(Forms.Screen? screen, string path)
     {
         var layer = DesktopHost.Find();
         if (layer is null)
@@ -121,15 +153,17 @@ public sealed class WallpaperManager : IDisposable
             return false;
         }
 
+        string key = screen?.DeviceName ?? AllScreensKey;
+        var bounds = screen?.Bounds ?? Forms.SystemInformation.VirtualScreen;
         try
         {
-            var video = new VideoWallpaper(screen, layer, path, _config.MaxFps, reason =>
+            var video = new VideoWallpaper(screen?.DeviceName ?? "tous les écrans", bounds, layer, path, _config.MaxFps, reason =>
                 _dispatcher.InvokeAsync(() =>
                 {
                     Log.Write($"Lecture impossible ({path}) : {reason}");
                     Notify?.Invoke($"Vidéo illisible : {reason}.");
                 }));
-            _videos[screen.DeviceName] = video;
+            _videos[key] = video;
             return true;
         }
         catch (Exception ex)
@@ -140,13 +174,18 @@ public sealed class WallpaperManager : IDisposable
         }
     }
 
-    private void StopVideo(Forms.Screen screen)
+    private void StopVideo(string key)
     {
-        if (_videos.Remove(screen.DeviceName, out var video))
+        if (_videos.Remove(key, out var video))
         {
             video.Dispose();
             DesktopHost.RefreshSystemWallpaper();
         }
+    }
+
+    private void StopAllVideos()
+    {
+        foreach (var key in _videos.Keys.ToList()) StopVideo(key);
     }
 
     private void UpdatePauseState()

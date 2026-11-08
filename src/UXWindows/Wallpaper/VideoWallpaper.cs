@@ -12,19 +12,19 @@ internal sealed class VideoWallpaper : IDisposable
     private readonly HostWindow _host;
     private readonly VideoRenderer _renderer;
 
-    public Forms.Screen Screen { get; }
     public string Path { get; }
 
-    public VideoWallpaper(Forms.Screen screen, DesktopHost.Layer layer, string path, int maxFps, Action<string> onError)
+    /// <param name="name">Nom pour le journal (écran, ou « tous les écrans »).</param>
+    /// <param name="bounds">Zone couverte en pixels physiques : un écran, ou tout le bureau pour une image étalée.</param>
+    public VideoWallpaper(string name, System.Drawing.Rectangle bounds, DesktopHost.Layer layer, string path, int maxFps, Action<string> onError)
     {
-        Screen = screen;
         Path = path;
 
-        // Position de l'écran dans le repère de la fenêtre parente (pixels physiques).
-        var origin = new Native.POINT { X = screen.Bounds.Left, Y = screen.Bounds.Top };
+        // Position dans le repère de la fenêtre parente (pixels physiques).
+        var origin = new Native.POINT { X = bounds.Left, Y = bounds.Top };
         Native.MapWindowPoints(IntPtr.Zero, layer.Parent, ref origin, 1);
 
-        _host = new HostWindow(layer.Parent, origin.X, origin.Y, screen.Bounds.Width, screen.Bounds.Height);
+        _host = new HostWindow(layer.Parent, origin.X, origin.Y, bounds.Width, bounds.Height);
 
         // Juste sous les icônes du bureau (organisation 24H2+).
         if (layer.Raised && layer.InsertAfter != IntPtr.Zero)
@@ -33,12 +33,12 @@ internal sealed class VideoWallpaper : IDisposable
                 Native.SWP_NOMOVE | Native.SWP_NOSIZE | Native.SWP_NOACTIVATE);
         }
 
-        Log.Write($"Fond vidéo {screen.DeviceName} : fenêtre {_host.Handle:X} à ({origin.X},{origin.Y}) " +
-                  $"{screen.Bounds.Width}x{screen.Bounds.Height}, fichier {path}");
+        Log.Write($"Fond vidéo {name} : fenêtre {_host.Handle:X} à ({origin.X},{origin.Y}) " +
+                  $"{bounds.Width}x{bounds.Height}, fichier {path}");
 
         try
         {
-            _renderer = new VideoRenderer(_host.Handle, screen.Bounds.Width, screen.Bounds.Height, path, maxFps);
+            _renderer = new VideoRenderer(_host.Handle, bounds.Width, bounds.Height, path, maxFps);
         }
         catch
         {

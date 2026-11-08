@@ -22,8 +22,9 @@ public static class ScreenHelper
     }
 
     /// <summary>Nom lisible : « écran principal », « écran de gauche », « écran de droite »…</summary>
-    public static string Label(Forms.Screen screen)
+    public static string Label(Forms.Screen? screen)
     {
+        if (screen is null) return "tous les écrans (une seule image)";
         if (screen.Primary) return "écran principal";
 
         var primary = Forms.Screen.PrimaryScreen;

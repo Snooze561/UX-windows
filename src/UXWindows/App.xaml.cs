@@ -75,8 +75,10 @@ public partial class App : System.Windows.Application
         menu.Items.Add("Réglages…", null, (_, _) => OpenSettings());
         menu.Items.Add(new Forms.ToolStripSeparator());
 
-        // Un sous-menu par écran, de gauche à droite.
-        foreach (var screen in Forms.Screen.AllScreens.OrderBy(s => s.Bounds.Left))
+        // Un sous-menu par écran, de gauche à droite, puis « tous les écrans » (une seule image étalée).
+        var targets = Forms.Screen.AllScreens.OrderBy(s => s.Bounds.Left).Cast<Forms.Screen?>().ToList();
+        if (targets.Count > 1) targets.Add(null);
+        foreach (var screen in targets)
         {
             var item = new Forms.ToolStripMenuItem($"Fond : {ScreenHelper.Label(screen)}");
             item.DropDownItems.Add("Choisir une vidéo ou une image…", null, (_, _) => PickWallpaper(screen));
@@ -119,12 +121,12 @@ public partial class App : System.Windows.Application
         return System.Drawing.SystemIcons.Application;
     }
 
-    private void PickWallpaper(Forms.Screen screen)
+    private void PickWallpaper(Forms.Screen? screen)
     {
         if (PickWallpaperFile(screen) is { } file) _wallpapers?.SetWallpaper(screen, file);
     }
 
-    private static string? PickWallpaperFile(Forms.Screen screen)
+    private static string? PickWallpaperFile(Forms.Screen? screen)
     {
         using var dialog = new Forms.OpenFileDialog
         {

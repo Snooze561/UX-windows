@@ -17,7 +17,7 @@ D'abord pour un usage personnel, puis publiée.
 
 ### Fond d'écran animé (étape 2)
 
-- Un fond différent par écran.
+- Un fond différent par écran, ou une seule image / vidéo étalée sur tous les écrans (« tous les écrans » ; image : mode « Étendre » de Windows ; vidéo : une seule fenêtre sur tout le bureau).
 - Vidéos (mp4, wmv, mov, m4v, mkv, avi) : décodage matériel Media Foundation, sans son, plafonnées à 30 images/s, affichées via DirectComposition (seule méthode visible derrière les icônes sur Windows 11 24H2 et plus). Le rendu s'arrête complètement en pause.
 - Images fixes (jpg, png, bmp) : appliquées comme vrai fond d'écran Windows, écran par écran. Aucune ressource consommée. « Retirer » remet le fond d'origine.
 - Journal `%APPDATA%\UXWindows\journal.txt` (ouvrable depuis le menu) et bulle de notification en cas d'erreur.

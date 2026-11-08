@@ -16,10 +16,10 @@ public partial class SettingsWindow : Window
     private readonly AppConfig _config;
     private readonly WallpaperManager _wallpapers;
     private readonly UtilityPanel _panel;
-    private readonly Func<Forms.Screen, string?> _pickFile;
+    private readonly Func<Forms.Screen?, string?> _pickFile;
     private bool _loading = true;
 
-    public SettingsWindow(AppConfig config, WallpaperManager wallpapers, UtilityPanel panel, Func<Forms.Screen, string?> pickFile)
+    public SettingsWindow(AppConfig config, WallpaperManager wallpapers, UtilityPanel panel, Func<Forms.Screen?, string?> pickFile)
     {
         _config = config;
         _wallpapers = wallpapers;
@@ -59,9 +59,12 @@ public partial class SettingsWindow : Window
     private void BuildWallpaperRows()
     {
         WallpaperRows.Children.Clear();
-        foreach (var screen in Forms.Screen.AllScreens.OrderBy(s => s.Bounds.Left))
+        // Chaque écran, puis « tous les écrans » : une seule image ou vidéo étalée sur tout le bureau.
+        var targets = Forms.Screen.AllScreens.OrderBy(s => s.Bounds.Left).Cast<Forms.Screen?>().ToList();
+        if (targets.Count > 1) targets.Add(null);
+        foreach (var screen in targets)
         {
-            _config.Wallpapers.TryGetValue(screen.DeviceName, out var path);
+            _config.Wallpapers.TryGetValue(screen?.DeviceName ?? WallpaperManager.AllScreensKey, out var path);
 
             var row = new DockPanel { Margin = new Thickness(0, 0, 0, 12) };
 
@@ -83,7 +86,9 @@ public partial class SettingsWindow : Window
             text.Children.Add(new TextBlock { Text = Capitalize(ScreenHelper.Label(screen)), FontSize = 14 });
             text.Children.Add(new TextBlock
             {
-                Text = path is null ? "Fond Windows" : Path.GetFileName(path),
+                Text = path is not null ? Path.GetFileName(path)
+                    : screen is not null && _wallpapers.SpannedWallpaper is not null ? "Utilise l'image de tous les écrans"
+                    : screen is null ? "Aucune" : "Fond Windows",
                 FontSize = 12,
                 Foreground = (System.Windows.Media.Brush)FindResource("TextSecondary"),
                 TextTrimming = TextTrimming.CharacterEllipsis,

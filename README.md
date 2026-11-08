@@ -15,7 +15,7 @@ Le détail est dans le [cahier des charges](docs/CAHIER_DES_CHARGES.md).
 
 Une icône apparaît à côté de l'horloge de la barre des tâches. Clic droit dessus :
 - **Réglages…** : fonds de chaque écran, fluidité des vidéos, écran et sections du panneau, démarrage avec Windows, température du processeur ;
-- choisir rapidement un fond, mettre les fonds en pause, masquer le panneau, ouvrir le journal, quitter.
+- choisir rapidement un fond (pour un écran, ou **tous les écrans** : une seule image ou vidéo étalée sur les deux), mettre les fonds en pause, masquer le panneau, ouvrir le journal, quitter.
 
 Les fonds animés se mettent en pause tout seuls quand un jeu ou une vidéo passe en plein écran.
 
