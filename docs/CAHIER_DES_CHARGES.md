@@ -36,20 +36,23 @@ Ancré sur toute la hauteur de l'écran de gauche, fond sombre.
 |---|---|
 | Horloge | Heure et date |
 | Processeur (CPU) | Température, consommation en watts, charge en % |
-| Carte graphique (GPU) | Température, consommation en watts, charge en % |
+| Carte graphique (GPU) | Température, consommation en watts, charge en % (carte dédiée NVIDIA / AMD / Intel Arc en priorité) |
+| Ventilateurs | Vitesse (tr/min et %) de chaque ventilateur, profil actif d'EZFAN et boutons pour en changer, bouton « Ouvrir EZFAN » |
 | Apple Music | Titre en cours, pochette, lecture / pause / suivant / précédent |
 | Claude Code | Bouton de lancement, et suivi des sessions (tâche terminée, attend une réponse) |
 
 Notes techniques :
 - Températures et watts : bibliothèque **LibreHardwareMonitor** 0.9.6, lue toutes les 2 s. La carte graphique marche sans droits. Le processeur demande le pilote **PawnIO** et des droits administrateur : l'app lance alors une copie d'elle-même en mode `--capteurs` (administrateur) qui écrit ses lectures dans `%LOCALAPPDATA%\UXWindows\capteurs.json` ; l'app principale reste en mode normal.
 - Claude Code : lecture des journaux de session `%USERPROFILE%\.claude\projects\**\*.jsonl` (sessions lancées sur ce PC uniquement). « En cours » si le fichier a bougé il y a moins de 20 s, « attend ta réponse » si le dernier message est de Claude. Le bouton ouvre l'app Claude, sinon `claude` dans Windows Terminal, sinon claude.ai/code.
+- Carte graphique : la carte dédiée passe avant la puce intégrée (NVIDIA, puis AMD Radeon RX / PRO, Intel Arc A / B, puis Radeon Graphics des Ryzen et Intel UHD / Iris). Choix manuel possible dans les réglages. Les cartes trouvées sont notées dans le journal.
+- Ventilateurs : UX-windows ne pilote jamais les ventilateurs (deux programmes se battraient). Il lit l'interface locale d'EZFAN (`http://127.0.0.1:5400/api/state`) toutes les 2 s (10 s quand EZFAN est fermé), et change le profil actif par `PUT /api/config`. « Lancer EZFAN » passe par sa tâche planifiée « EZFAN » (aucune demande d'autorisation), sinon par son exe (chemin retenu dans `config.json`).
 - Tous les rafraîchissements s'arrêtent quand le panneau est masqué.
 - Apple Music : via les contrôles média de Windows (`GlobalSystemMediaTransportControls`), qui marchent avec l'app Apple Music de Windows.
 
 ### Réglages et publication (étape 4)
 
 - Fenêtre de réglages (icône de notification > Réglages…), appliqués tout de suite et enregistrés dans `config.json` :
-  fonds de chaque écran, images/s des vidéos (15 / 30 / 60), écran du panneau, sections affichées, démarrage avec Windows, température du processeur.
+  fonds de chaque écran, images/s des vidéos (15 / 30 / 60), écran du panneau, sections affichées, carte graphique affichée, démarrage avec Windows, température du processeur.
 - Démarrage avec Windows : valeur `UX-windows` dans `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` (chemin remis à jour à chaque lancement).
 - Température du processeur sans demande à chaque fois : tâche planifiée « UX-windows capteurs » (droits les plus élevés, à l'ouverture de session, sans limite de durée), créée une seule fois avec une autorisation administrateur. L'app la relance au démarrage si besoin ; l'assistant s'arrête quand l'app se ferme.
 - Installateur Inno Setup, par utilisateur (`%LOCALAPPDATA%\Programs\UX-windows`), sans droits administrateur, en français.

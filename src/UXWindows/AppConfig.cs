@@ -28,6 +28,13 @@ public sealed class AppConfig
     public bool ShowSystem { get; set; } = true;
     public bool ShowMusic { get; set; } = true;
     public bool ShowClaude { get; set; } = true;
+    public bool ShowFans { get; set; } = true;
+
+    /// <summary>Carte graphique affichée (nom complet). Vide : la carte dédiée, choisie automatiquement.</summary>
+    public string? PanelGpu { get; set; }
+
+    /// <summary>Chemin d'EZFAN.exe, retenu quand on l'a cherché à la main.</summary>
+    public string? EzfanPath { get; set; }
 
     public static AppConfig Load()
     {

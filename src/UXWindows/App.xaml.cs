@@ -43,8 +43,8 @@ public partial class App : System.Windows.Application
         _wallpapers.Notify += ShowNotification;
         _wallpapers.Start();
 
-        _panel = new UtilityPanel(ScreenHelper.GetUtilityScreen(_config.PanelScreen));
-        _panel.ApplySections(_config.ShowSystem, _config.ShowMusic, _config.ShowClaude);
+        _panel = new UtilityPanel(ScreenHelper.GetUtilityScreen(_config.PanelScreen), _config);
+        _panel.ApplySections(_config.ShowSystem, _config.ShowMusic, _config.ShowClaude, _config.ShowFans);
         _panel.Show();
 
         // Si l'app a été déplacée (nouvelle installation), le démarrage avec Windows suit.
@@ -94,6 +94,7 @@ public partial class App : System.Windows.Application
         menu.Items.Add(_pauseItem);
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add("Afficher / masquer le panneau", null, (_, _) => TogglePanel());
+        menu.Items.Add("Ventilateurs (EZFAN)", null, (_, _) => _panel?.OpenEzfan());
         menu.Items.Add("Ouvrir le journal (en cas de problème)", null, (_, _) => OpenLog());
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add("Quitter", null, (_, _) => Shutdown());

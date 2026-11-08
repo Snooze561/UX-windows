@@ -33,30 +33,55 @@ public sealed class HardwareSensors : IDisposable
         }
     }
 
+    /// <summary>Nom de la carte graphique à afficher (réglages). Vide : choix automatique.</summary>
+    public string? PreferredGpu { get; set; }
+
+    /// <summary>Cartes graphiques trouvées lors de la dernière lecture.</summary>
+    public IReadOnlyList<string> GpuNames { get; private set; } = [];
+
+    private static bool IsGpu(IHardware hw) =>
+        hw.HardwareType is HardwareType.GpuNvidia or HardwareType.GpuAmd or HardwareType.GpuIntel;
+
+    /// <summary>
+    /// Classe les cartes : NVIDIA, puis AMD Radeon RX / Intel Arc dédiées, puis les puces intégrées
+    /// (Radeon Graphics des Ryzen, Intel UHD / Iris), qui ne servent pas à jouer.
+    /// </summary>
+    internal static int GpuScore(IHardware hw) => GpuScore(hw.HardwareType, hw.Name);
+
+    public static int GpuScore(HardwareType type, string name)
+    {
+        bool discrete = type switch
+        {
+            HardwareType.GpuNvidia => true,
+            HardwareType.GpuAmd => IsDiscreteAmdName(name),
+            // « Arc A770 », « Arc B580 » sont dédiées ; « Arc Graphics » (Core Ultra) est intégrée.
+            HardwareType.GpuIntel => System.Text.RegularExpressions.Regex.IsMatch(name, @"Arc\S*\s+[AB]\d{3}",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase),
+            _ => false,
+        };
+        int brand = type switch { HardwareType.GpuNvidia => 3, HardwareType.GpuAmd => 2, _ => 1 };
+        return (discrete ? 10 : 0) + brand;
+    }
+
+    /// <summary>« AMD Radeon RX 7800 XT », « Radeon PRO W7600 », « Radeon VII » sont dédiées ; « AMD Radeon(TM) Graphics », « Radeon 780M » sont intégrées.</summary>
+    public static bool IsDiscreteAmdName(string name) =>
+        System.Text.RegularExpressions.Regex.IsMatch(name,
+            @"\bRX\s?\d|\bR[579]\s?\d{3}|\bPRO\s+W\d|Radeon\s+VII|Vega\s+(56|64)|Instinct|FirePro",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+        && !System.Text.RegularExpressions.Regex.IsMatch(name, @"\d{3}M\b|Vega\s+\d\b|\bGraphics\b",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
     public SensorSnapshot Read()
     {
         lock (_gate)
         {
-            IHardware? cpu = null;
-            IHardware? gpu = null;
+            var cpu = _computer.Hardware.FirstOrDefault(h => h.HardwareType == HardwareType.Cpu);
+            var gpus = _computer.Hardware.Where(IsGpu).ToList();
+            GpuNames = gpus.Select(g => g.Name).ToList();
 
-            foreach (var hw in _computer.Hardware)
-            {
-                switch (hw.HardwareType)
-                {
-                    case HardwareType.Cpu:
-                        cpu ??= hw;
-                        break;
-                    // On préfère une carte graphique dédiée à la puce intégrée.
-                    case HardwareType.GpuNvidia:
-                    case HardwareType.GpuAmd:
-                        if (gpu is null || gpu.HardwareType == HardwareType.GpuIntel) gpu = hw;
-                        break;
-                    case HardwareType.GpuIntel:
-                        gpu ??= hw;
-                        break;
-                }
-            }
+            // La carte choisie dans les réglages, sinon la carte dédiée la plus puissante.
+            var gpu = gpus.FirstOrDefault(g => g.Name == PreferredGpu)
+                ?? gpus.OrderByDescending(GpuScore).FirstOrDefault();
 
             cpu?.Update();
             gpu?.Update();

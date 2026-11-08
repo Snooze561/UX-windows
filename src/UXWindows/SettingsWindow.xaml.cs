@@ -44,6 +44,16 @@ public partial class SettingsWindow : Window
         ShowSystemBox.IsChecked = _config.ShowSystem;
         ShowMusicBox.IsChecked = _config.ShowMusic;
         ShowClaudeBox.IsChecked = _config.ShowClaude;
+        ShowFansBox.IsChecked = _config.ShowFans;
+
+        GpuBox.Items.Add(new ComboBoxItem { Content = "Automatique (carte dédiée)", Tag = "" });
+        foreach (var name in _panel.GpuNames.Union(_config.PanelGpu is null ? Array.Empty<string>() : new[] { _config.PanelGpu }))
+        {
+            var item = new ComboBoxItem { Content = name, Tag = name };
+            GpuBox.Items.Add(item);
+            if (name == _config.PanelGpu) GpuBox.SelectedItem = item;
+        }
+        GpuBox.SelectedIndex = GpuBox.SelectedIndex < 0 ? 0 : GpuBox.SelectedIndex;
 
         StartupBox.IsChecked = StartupManager.IsStartWithWindowsEnabled();
         RefreshCpuState();
@@ -125,8 +135,18 @@ public partial class SettingsWindow : Window
         _config.ShowSystem = ShowSystemBox.IsChecked == true;
         _config.ShowMusic = ShowMusicBox.IsChecked == true;
         _config.ShowClaude = ShowClaudeBox.IsChecked == true;
+        _config.ShowFans = ShowFansBox.IsChecked == true;
         _config.Save();
-        _panel.ApplySections(_config.ShowSystem, _config.ShowMusic, _config.ShowClaude);
+        _panel.ApplySections(_config.ShowSystem, _config.ShowMusic, _config.ShowClaude, _config.ShowFans);
+    }
+
+    private void Gpu_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || GpuBox.SelectedItem is not ComboBoxItem item) return;
+        string tag = (string)item.Tag;
+        _config.PanelGpu = tag.Length == 0 ? null : tag;
+        _config.Save();
+        _panel.SetGpu(_config.PanelGpu);
     }
 
     // ---------- Démarrage ----------
