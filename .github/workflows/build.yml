@@ -67,4 +67,7 @@ jobs:
           files: |
             out/*.exe
             publish/UXWindows.exe
+          # Le mode d'emploi (dont l'installation d'EZFAN) est ajouté au texte de la release.
+          body_path: docs/NOTES_DE_VERSION.md
+          append_body: true
           generate_release_notes: true
