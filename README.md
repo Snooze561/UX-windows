@@ -44,7 +44,7 @@ La carte graphique, elle, s'affiche sans rien installer.
 La section « Ventilateurs » montre ce que fait **[EZFAN](https://github.com/Snooze561/EZFAN)**, l'app qui pilote les ventilateurs. Il faut donc l'installer aussi :
 
 1. Installe PawnIO si ce n'est pas déjà fait (voir juste au-dessus).
-2. Télécharge `EZFAN.exe` sur la [page Releases d'EZFAN](https://github.com/Snooze561/EZFAN/releases), lance-le et suis l'assistant.
+2. Télécharge `EZFAN-Setup-….exe` sur la [page Releases d'EZFAN](https://github.com/Snooze561/EZFAN/releases), installe-le, lance EZFAN et suis l'assistant.
 3. Dans EZFAN, active le lancement avec Windows.
 
 Le panneau trouve EZFAN tout seul. S'il n'est pas lancé, le bouton « Lancer EZFAN » le démarre (la première fois, UX-windows peut te demander où se trouve `EZFAN.exe`).
