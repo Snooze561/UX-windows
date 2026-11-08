@@ -62,7 +62,12 @@
                     </DockPanel>
                     <CheckBox x:Name="ShowSystemBox" Content="Système (processeur et carte graphique)" Click="Sections_Changed"/>
                     <CheckBox x:Name="ShowMusicBox" Content="Musique" Click="Sections_Changed"/>
-                    <CheckBox x:Name="ShowClaudeBox" Content="Claude Code" Click="Sections_Changed" Margin="0"/>
+                    <CheckBox x:Name="ShowClaudeBox" Content="Claude Code" Click="Sections_Changed"/>
+                    <CheckBox x:Name="ShowFansBox" Content="Ventilateurs (avec l'app EZFAN)" Click="Sections_Changed" Margin="0"/>
+                    <DockPanel Margin="0,14,0,0">
+                        <ComboBox x:Name="GpuBox" DockPanel.Dock="Right" Width="200" SelectionChanged="Gpu_Changed"/>
+                        <TextBlock Text="Carte graphique affichée" Style="{StaticResource Label}"/>
+                    </DockPanel>
                 </StackPanel>
             </Border>
 

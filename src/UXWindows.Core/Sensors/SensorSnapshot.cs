@@ -17,16 +17,19 @@ public sealed record SensorSnapshot
 
     public static readonly SensorSnapshot Empty = new();
 
-    /// <summary>Complète les valeurs manquantes avec celles d'une autre lecture.</summary>
-    public SensorSnapshot FillFrom(SensorSnapshot? other) => other is null ? this : this with
+    /// <summary>
+    /// Prend le processeur dans la lecture de l'assistant administrateur (seul à le voir),
+    /// et garde la carte graphique de cette lecture-ci (celle choisie dans les réglages).
+    /// </summary>
+    public SensorSnapshot WithCpuFrom(SensorSnapshot? helper) => helper is null ? this : this with
     {
-        CpuName = CpuName ?? other.CpuName,
-        CpuTemperature = CpuTemperature ?? other.CpuTemperature,
-        CpuPower = CpuPower ?? other.CpuPower,
-        CpuLoad = CpuLoad ?? other.CpuLoad,
-        GpuName = GpuName ?? other.GpuName,
-        GpuTemperature = GpuTemperature ?? other.GpuTemperature,
-        GpuPower = GpuPower ?? other.GpuPower,
-        GpuLoad = GpuLoad ?? other.GpuLoad,
+        CpuName = helper.CpuName ?? CpuName,
+        CpuTemperature = helper.CpuTemperature ?? CpuTemperature,
+        CpuPower = helper.CpuPower ?? CpuPower,
+        CpuLoad = helper.CpuLoad ?? CpuLoad,
+        GpuName = GpuName ?? helper.GpuName,
+        GpuTemperature = GpuName is null ? helper.GpuTemperature : GpuTemperature,
+        GpuPower = GpuName is null ? helper.GpuPower : GpuPower,
+        GpuLoad = GpuName is null ? helper.GpuLoad : GpuLoad,
     };
 }

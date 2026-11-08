@@ -2,7 +2,7 @@
 
 Une application Windows minimaliste pour le double écran :
 fond d'écran animé économe en ressources, et un panneau utilitaire sur l'écran de gauche
-(horloge, températures et consommation du CPU et du GPU, Apple Music).
+(horloge, températures et consommation du CPU et du GPU, ventilateurs avec EZFAN, Apple Music, Claude Code).
 
 Le détail est dans le [cahier des charges](docs/CAHIER_DES_CHARGES.md).
 
@@ -14,7 +14,7 @@ Le détail est dans le [cahier des charges](docs/CAHIER_DES_CHARGES.md).
 3. Windows peut afficher « Windows a protégé votre ordinateur » : clique sur **Informations complémentaires**, puis **Exécuter quand même**. C'est normal pour une app pas encore signée.
 
 Une icône apparaît à côté de l'horloge de la barre des tâches. Clic droit dessus :
-- **Réglages…** : fonds de chaque écran, fluidité des vidéos, écran et sections du panneau, démarrage avec Windows, température du processeur ;
+- **Réglages…** : fonds de chaque écran, fluidité des vidéos, écran et sections du panneau, carte graphique affichée, démarrage avec Windows, température du processeur ;
 - choisir rapidement un fond (pour un écran, ou **tous les écrans** : une seule image ou vidéo étalée sur les deux), mettre les fonds en pause, masquer le panneau, ouvrir le journal, quitter.
 
 Les fonds animés se mettent en pause tout seuls quand un jeu ou une vidéo passe en plein écran.
@@ -24,6 +24,8 @@ Pour désinstaller : *Paramètres Windows > Applications > UX-windows > Désinst
 ## Le panneau de gauche
 
 - **Système** : température, consommation (watts) et charge du processeur et de la carte graphique.
+  C'est la carte dédiée (NVIDIA, AMD Radeon RX, Intel Arc) qui s'affiche, pas la puce intégrée au processeur ; on peut en choisir une autre dans les Réglages.
+- **Ventilateurs** : vitesse de chaque ventilateur et profil actif de **[EZFAN](https://github.com/Snooze561/EZFAN)**, avec un bouton par profil (Bureautique, Jeux légers, Jeux AAA, Performance) et un bouton pour ouvrir EZFAN. C'est EZFAN qui pilote les ventilateurs ; UX-windows affiche et change seulement le profil.
 - **Musique** : morceau en cours dans Apple Music (ou toute autre app de musique), avec pochette et boutons.
 - **Claude Code** : tes sessions Claude Code sur ce PC (en cours, ou en attente de ta réponse) et un bouton pour ouvrir Claude.
 
