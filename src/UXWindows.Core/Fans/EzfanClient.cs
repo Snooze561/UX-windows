@@ -123,6 +123,8 @@ public sealed class EzfanClient : IDisposable
             knownExePath,
             TaskExePath(),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "EZFAN", "EZFAN.exe"),
+            // Installateur d'EZFAN (Program Files).
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "EZFAN", "EZFAN.exe"),
             Path.Combine(home, "Downloads", "EZFAN.exe"),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "EZFAN.exe"),
         };
