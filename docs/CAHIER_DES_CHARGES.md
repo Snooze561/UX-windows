@@ -30,7 +30,7 @@ D'abord pour un usage personnel, puis publiée.
 
 ### Panneau utilitaire de l'écran de gauche (étape 3)
 
-Ancré sur toute la hauteur de l'écran de gauche, fond sombre.
+Ancré sur toute la hauteur de l'écran de gauche. Pas de bandeau : chaque widget est une carte sombre translucide aux coins arrondis, posée sur le fond d'écran. Les cartes se réorganisent par glisser-déposer (ordre enregistré dans `config.json`, `CardOrder`) ; les boutons des cartes restent cliquables.
 
 | Widget | Contenu |
 |---|---|

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -48,6 +49,7 @@ public partial class UtilityPanel : Window
         _config = config;
         InitializeComponent();
         ClaudeList.ItemsSource = _claudeRows;
+        SetupCardDragging();
 
         // Horloge : une fois par seconde.
         _clockTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromSeconds(1) };
@@ -88,10 +90,10 @@ public partial class UtilityPanel : Window
     /// <summary>Affiche ou masque chaque section selon les réglages.</summary>
     public void ApplySections(bool system, bool music, bool claude, bool fans)
     {
-        SystemSection.Visibility = system ? Visibility.Visible : Visibility.Collapsed;
-        MusicSection.Visibility = music ? Visibility.Visible : Visibility.Collapsed;
-        ClaudeSection.Visibility = claude ? Visibility.Visible : Visibility.Collapsed;
-        FansSection.Visibility = fans ? Visibility.Visible : Visibility.Collapsed;
+        CpuCard.Visibility = GpuCard.Visibility = system ? Visibility.Visible : Visibility.Collapsed;
+        MusicCard.Visibility = music ? Visibility.Visible : Visibility.Collapsed;
+        ClaudeCard.Visibility = claude ? Visibility.Visible : Visibility.Collapsed;
+        FansCard.Visibility = fans ? Visibility.Visible : Visibility.Collapsed;
         if (fans) _ = UpdateFansAsync();
     }
 
@@ -145,6 +147,113 @@ public partial class UtilityPanel : Window
         }
     }
 
+    // ---------- Cartes déplaçables ----------
+
+    private Border? _dragCard;
+    private Point _dragStart;
+    private bool _dragging;
+
+    /// <summary>Remet les cartes dans l'ordre enregistré et permet de les déplacer à la souris.</summary>
+    private void SetupCardDragging()
+    {
+        ApplyCardOrder(_config.CardOrder);
+        foreach (var card in Widgets.Children.OfType<Border>())
+            card.PreviewMouseLeftButtonDown += Card_MouseDown;
+        Widgets.PreviewMouseMove += Widgets_MouseMove;
+        Widgets.PreviewMouseLeftButtonUp += (_, _) => EndDrag();
+        Widgets.LostMouseCapture += (_, _) => EndDrag();
+    }
+
+    /// <summary>Range les cartes dans l'ordre donné (les cartes inconnues ou nouvelles restent à la fin).</summary>
+    public void ApplyCardOrder(IReadOnlyList<string>? order)
+    {
+        var cards = Widgets.Children.OfType<Border>().ToList();
+        var sorted = cards
+            .OrderBy(c => order is null ? -1 : IndexOrEnd(order, (string)c.Tag))
+            .ThenBy(cards.IndexOf)
+            .ToList();
+        Widgets.Children.Clear();
+        foreach (var card in sorted) Widgets.Children.Add(card);
+    }
+
+    /// <summary>Ordre d'origine : horloge, processeur, carte graphique, ventilateurs, musique, Claude.</summary>
+    public static readonly string[] DefaultCardOrder = ["clock", "cpu", "gpu", "fans", "music", "claude"];
+
+    private static int IndexOrEnd(IReadOnlyList<string> order, string tag)
+    {
+        for (int i = 0; i < order.Count; i++)
+            if (order[i] == tag) return i;
+        return int.MaxValue;
+    }
+
+    private void Card_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        // Les boutons (lecture, profils, Ouvrir…) gardent leur clic.
+        for (var d = e.OriginalSource as DependencyObject; d is not null && d != sender; d = VisualTreeHelper.GetParent(d))
+            if (d is System.Windows.Controls.Primitives.ButtonBase) return;
+
+        _dragCard = (Border)sender;
+        _dragStart = e.GetPosition(Widgets);
+        _dragging = false;
+    }
+
+    private void Widgets_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (_dragCard is null) return;
+        if (e.LeftButton != MouseButtonState.Pressed)
+        {
+            EndDrag();
+            return;
+        }
+
+        var position = e.GetPosition(Widgets);
+        if (!_dragging)
+        {
+            // Un petit seuil : un simple clic sur une carte ne la déplace pas.
+            if (Math.Abs(position.Y - _dragStart.Y) < 8) return;
+            _dragging = true;
+            _dragCard.Opacity = 0.75;
+            Widgets.CaptureMouse();
+        }
+
+        // La carte prend la place correspondant à la hauteur de la souris.
+        var others = Widgets.Children.OfType<Border>().Where(c => c != _dragCard).ToList();
+        int target = CountBefore(others, position.Y);
+        int current = Widgets.Children.IndexOf(_dragCard);
+        if (target != current)
+        {
+            Widgets.Children.Remove(_dragCard);
+            Widgets.Children.Insert(target, _dragCard);
+        }
+    }
+
+    /// <summary>Nombre de cartes visibles placées au-dessus de la souris (les cartes masquées suivent leur voisine).</summary>
+    private int CountBefore(List<Border> others, double y)
+    {
+        int last = -1;
+        for (int i = 0; i < others.Count; i++)
+            if (others[i].Visibility == Visibility.Visible
+                && others[i].TranslatePoint(new Point(0, others[i].ActualHeight / 2), Widgets).Y < y)
+                last = i;
+        return last + 1;
+    }
+
+    private void EndDrag()
+    {
+        var card = _dragCard;
+        bool moved = _dragging;
+        _dragCard = null;
+        _dragging = false;
+        if (card is null) return;
+
+        card.Opacity = 1;
+        if (Widgets.IsMouseCaptured) Widgets.ReleaseMouseCapture();
+        if (!moved) return;
+
+        _config.CardOrder = Widgets.Children.OfType<Border>().Select(c => (string)c.Tag).ToList();
+        _config.Save();
+    }
+
     // ---------- Horloge ----------
 
     private void UpdateClock()
@@ -158,7 +267,7 @@ public partial class UtilityPanel : Window
 
     private async Task UpdateSensorsAsync()
     {
-        if (_sensors is null || _readingSensors || SystemSection.Visibility != Visibility.Visible) return;
+        if (_sensors is null || _readingSensors || CpuCard.Visibility != Visibility.Visible) return;
         _readingSensors = true;
         try
         {
@@ -237,7 +346,7 @@ public partial class UtilityPanel : Window
 
     private async Task UpdateFansAsync()
     {
-        if (_readingFans || FansSection.Visibility != Visibility.Visible) return;
+        if (_readingFans || FansCard.Visibility != Visibility.Visible) return;
         _readingFans = true;
         try
         {

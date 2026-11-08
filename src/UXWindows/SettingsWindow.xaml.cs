@@ -140,6 +140,13 @@ public partial class SettingsWindow : Window
         _panel.ApplySections(_config.ShowSystem, _config.ShowMusic, _config.ShowClaude, _config.ShowFans);
     }
 
+    private void ResetCards_Click(object sender, RoutedEventArgs e)
+    {
+        _config.CardOrder = null;
+        _config.Save();
+        _panel.ApplyCardOrder(UtilityPanel.DefaultCardOrder);
+    }
+
     private void Gpu_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (_loading || GpuBox.SelectedItem is not ComboBoxItem item) return;

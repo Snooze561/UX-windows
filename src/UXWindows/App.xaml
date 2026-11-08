@@ -30,6 +30,24 @@
             <Setter Property="Margin" Value="0,0,0,8"/>
         </Style>
 
+        <!-- Carte du panneau : sombre et translucide, le fond d'écran se voit autour et derrière. -->
+        <SolidColorBrush x:Key="WidgetBackground" Color="#A00A0C12"/>
+        <SolidColorBrush x:Key="WidgetBorder" Color="#16FFFFFF"/>
+        <Style x:Key="WidgetCard" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource WidgetBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource WidgetBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="18,14"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <Style x:Key="CardLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
         <!-- Bouton sobre : icône ou texte, fond qui s'éclaire au survol -->
         <Style x:Key="FlatButton" TargetType="Button">
             <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
