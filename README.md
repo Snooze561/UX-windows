@@ -23,7 +23,11 @@ Pour désinstaller : *Paramètres Windows > Applications > UX-windows > Désinst
 
 ## Le panneau de gauche
 
-Chaque widget est une carte sombre et translucide posée sur le fond d'écran. Pour changer l'ordre, maintiens le clic sur une carte et fais-la glisser vers le haut ou le bas : l'ordre est retenu. *Réglages > Ordre d'origine* remet la disposition de départ.
+Chaque widget est une carte posée sur le fond d'écran, au choix dans les Réglages (« Style des cartes ») :
+- **Liquid glass** (par défaut) : verre dépoli, le fond d'écran est flouté derrière chaque carte, avec un liseré lumineux ;
+- **Classique** : cartes sombres et sobres.
+
+ Pour changer l'ordre, maintiens le clic sur une carte et fais-la glisser vers le haut ou le bas : l'ordre est retenu. *Réglages > Ordre d'origine* remet la disposition de départ.
 
 - **Système** : température, consommation (watts) et charge du processeur et de la carte graphique.
   C'est la carte dédiée (NVIDIA, AMD Radeon RX, Intel Arc) qui s'affiche, pas la puce intégrée au processeur ; on peut en choisir une autre dans les Réglages.

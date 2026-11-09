@@ -46,6 +46,12 @@ public partial class SettingsWindow : Window
         ShowClaudeBox.IsChecked = _config.ShowClaude;
         ShowFansBox.IsChecked = _config.ShowFans;
 
+        foreach (ComboBoxItem item in StyleBox.Items)
+            if ((string)item.Tag == _config.PanelStyle) StyleBox.SelectedItem = item;
+        if (StyleBox.SelectedIndex < 0) StyleBox.SelectedIndex = 0;
+        BlurBox.IsChecked = _config.GlassBlur;
+        BlurBox.IsEnabled = _config.PanelStyle == PanelStyles.Liquid;
+
         GpuBox.Items.Add(new ComboBoxItem { Content = "Automatique (carte dédiée)", Tag = "" });
         foreach (var name in _panel.GpuNames.Union(_config.PanelGpu is null ? Array.Empty<string>() : new[] { _config.PanelGpu }))
         {
@@ -138,6 +144,16 @@ public partial class SettingsWindow : Window
         _config.ShowFans = ShowFansBox.IsChecked == true;
         _config.Save();
         _panel.ApplySections(_config.ShowSystem, _config.ShowMusic, _config.ShowClaude, _config.ShowFans);
+    }
+
+    private void Style_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading || StyleBox.SelectedItem is not ComboBoxItem item) return;
+        _config.PanelStyle = (string)item.Tag;
+        _config.GlassBlur = BlurBox.IsChecked == true;
+        BlurBox.IsEnabled = _config.PanelStyle == PanelStyles.Liquid;
+        _config.Save();
+        _panel.ApplyStyle(_config.PanelStyle, _config.GlassBlur);
     }
 
     private void ResetCards_Click(object sender, RoutedEventArgs e)
