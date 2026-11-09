@@ -57,6 +57,15 @@
             <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <DockPanel Margin="0,0,0,14">
+                        <ComboBox x:Name="StyleBox" DockPanel.Dock="Right" Width="200" SelectionChanged="Style_Changed">
+                            <ComboBoxItem Content="Liquid glass" Tag="liquid"/>
+                            <ComboBoxItem Content="Classique (sobre)" Tag="classic"/>
+                        </ComboBox>
+                        <TextBlock Text="Style des cartes" Style="{StaticResource Label}"/>
+                    </DockPanel>
+                    <CheckBox x:Name="BlurBox" Content="Flouter le fond derrière les cartes (Liquid glass)" Click="Style_Changed"
+                              Margin="0,0,0,14"/>
+                    <DockPanel Margin="0,0,0,14">
                         <ComboBox x:Name="ScreenBox" DockPanel.Dock="Right" Width="200" SelectionChanged="Screen_Changed"/>
                         <TextBlock Text="Écran du panneau" Style="{StaticResource Label}"/>
                     </DockPanel>

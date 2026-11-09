@@ -31,14 +31,17 @@
         </Style>
 
         <!-- Carte du panneau : sombre et translucide, le fond d'écran se voit autour et derrière. -->
+        <!-- Style « Classique » ; le panneau remplace ces valeurs pour le style « Liquid glass ». -->
         <SolidColorBrush x:Key="WidgetBackground" Color="#A00A0C12"/>
         <SolidColorBrush x:Key="WidgetBorder" Color="#16FFFFFF"/>
+        <CornerRadius x:Key="WidgetRadius">14</CornerRadius>
+        <Thickness x:Key="WidgetPadding">18,14</Thickness>
         <Style x:Key="WidgetCard" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource WidgetBackground}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource WidgetBorder}"/>
+            <Setter Property="Background" Value="{DynamicResource WidgetBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource WidgetBorder}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="14"/>
-            <Setter Property="Padding" Value="18,14"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource WidgetRadius}"/>
+            <Setter Property="Padding" Value="{DynamicResource WidgetPadding}"/>
             <Setter Property="Margin" Value="0,0,0,10"/>
         </Style>
 

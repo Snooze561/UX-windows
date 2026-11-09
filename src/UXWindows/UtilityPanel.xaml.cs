@@ -35,6 +35,7 @@ public partial class UtilityPanel : Window
     private readonly DispatcherTimer _claudeTimer;
     private readonly DispatcherTimer _fanTimer;
     private readonly EzfanClient _ezfan = new();
+    private readonly GlassEffect _glass;
     private bool _readingFans;
     private readonly ObservableCollection<ClaudeRow> _claudeRows = new();
     private readonly MusicService _music = new();
@@ -68,7 +69,12 @@ public partial class UtilityPanel : Window
         _fanTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromSeconds(2) };
         _fanTimer.Tick += async (_, _) => await UpdateFansAsync();
 
-        SourceInitialized += (_, _) => PlaceOnScreen();
+        _glass = new GlassEffect(this, Widgets) { CornerRadius = PanelStyles.LiquidRadius };
+        SourceInitialized += (_, _) =>
+        {
+            PlaceOnScreen();
+            ApplyStyle(_config.PanelStyle, _config.GlassBlur);
+        };
         Loaded += async (_, _) => await StartWidgetsAsync();
         IsVisibleChanged += (_, _) => SetTimersRunning(IsVisible);
         Closed += (_, _) =>
@@ -95,6 +101,13 @@ public partial class UtilityPanel : Window
         ClaudeCard.Visibility = claude ? Visibility.Visible : Visibility.Collapsed;
         FansCard.Visibility = fans ? Visibility.Visible : Visibility.Collapsed;
         if (fans) _ = UpdateFansAsync();
+    }
+
+    /// <summary>Style des cartes : Liquid glass (avec ou sans flou) ou Classique.</summary>
+    public void ApplyStyle(string style, bool blur)
+    {
+        PanelStyles.Apply(this, style);
+        _glass.SetEnabled(style == PanelStyles.Liquid && blur);
     }
 
     /// <summary>Cartes graphiques trouvées (pour les réglages).</summary>

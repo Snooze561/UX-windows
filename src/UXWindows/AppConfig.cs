@@ -30,6 +30,12 @@ public sealed class AppConfig
     public bool ShowClaude { get; set; } = true;
     public bool ShowFans { get; set; } = true;
 
+    /// <summary>Style des cartes : « liquid » (verre dépoli, reflets) ou « classic » (sombre et sobre).</summary>
+    public string PanelStyle { get; set; } = PanelStyles.Liquid;
+
+    /// <summary>Style Liquid glass : flouter le fond d'écran derrière les cartes.</summary>
+    public bool GlassBlur { get; set; } = true;
+
     /// <summary>Ordre des cartes du panneau (clock, cpu, gpu, fans, music, claude). Vide : ordre d'origine.</summary>
     public List<string>? CardOrder { get; set; }
 
